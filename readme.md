@@ -1,2 +1,4 @@
 ### Auto JS
-- dy
+- fans page
+- comment page
+- app ui
