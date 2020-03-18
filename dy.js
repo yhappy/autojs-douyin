@@ -8,11 +8,13 @@ waitForActivity(
     "com.ss.android.ugc.aweme.following.ui.FollowRelationTabActivity",
     [(period = 200)]
 );
-var loop = 500;
+console.log("粉丝关系页面");
+sleep(2000);
+var loop = 5000;
 while (loop > 0) {
-    loop --;
+    console.log("loop: " + loop);
+    loop--;
     console.log(currentActivity());
-    console.log("粉丝关系页面");
     sleep(100);
     click(125, 947);
     click(125, 947);
@@ -21,6 +23,7 @@ while (loop > 0) {
         [(period = 100)]
     );
     console.log("个人信息页面");
+    sleep(500);
     var result = findFitAge(1, 99);
     console.log("age result: " + result);
     if (result) {
@@ -35,13 +38,13 @@ while (loop > 0) {
     }
     back();
     sleep(200);
-    swipe(150, 920, 150, 700, 800);
+    swipe(150, 900, 150, 720, 800);
 }
 
 function sexCheck(bounds) {
     var x = bounds.left;
     var y = bounds.top;
-    if(y > 1200) return;
+    if (y > 1200) return;
     var margin = bounds.height() / 4;
     click(x + margin, y + margin);
     click(x + margin * 3 + 5, y + margin * 3);
