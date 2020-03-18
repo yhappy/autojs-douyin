@@ -5,22 +5,63 @@ if (!requestScreenCapture()) {
     exit();
 }
 console.log(currentActivity());
+clickMessageIcon();
+while (1) {
+   var avatar = findAvatar(0, 1000);
+   if(avatar){
+       click(avatar.x, avatar.y)
+       sleep(2000);
+       back();
+   }
+   sleep(2000);
+   swipe(30, 1000, 30, 820, 800);
+}
 
-waitForActivity(
-    "com.ss.android.ugc.aweme.main.MainActivity",
-    [(period = 200)]
-);
+function clickMessageIcon() {
+    waitForActivity(
+        "com.ss.android.ugc.aweme.main.MainActivity",
+        [(period = 200)]
+    );
+    var message_icon = id("a59").find();
+    message_icon_size = message_icon.size();
+    console.log(message_icon_size)
+    var message_bounds = message_icon[message_icon_size - 2].bounds()
+    console.log(message_bounds);
+    click(message_bounds.centerX(), message_bounds.centerY());
+}
 
-sleep(2000);
-id("a59").findOne().click();
-sleep(2000);
-// id("do8").findOne().children().forEach(child => {
-//     var target = child.findOne(id("ayz"));
-//     console.log(target.bounds());
-// });
-var target = id("ayz").findOne();
-var bounds = target.bounds();
-console.log(bounds);
-click(bounds.left, bounds.top);
-sleep(1000);
-back();
+function findAvatar(x, y) {
+    var img = captureScreen();
+    var point = findColor(img, "#000000", {
+        region: [x, y, 140, 170],
+        threshold: 40
+    });
+    if (point) {
+        console.log("find avatar:" + point);
+        return point;
+    } else {
+        console.log("no match");
+        return false;
+    }
+}
+
+function checkUser() {
+    waitForActivity(
+        "com.ss.android.ugc.aweme.profile.ui.UserProfileActivity",
+        [(period = 100)]
+    );
+    console.log("个人信息页面");
+    sleep(500);
+    var result = findFitAge(1, 99);
+    console.log("age result: " + result);
+    if (result) {
+        console.log("find age");
+        var age_bounds = result;
+        console.log(bounds);
+        sexCheck(age_bounds);
+        //click or not
+    } else {
+        console.log("not find age")
+        toast("无年龄");
+    }
+}
