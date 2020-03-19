@@ -10,11 +10,12 @@ while (1) {
    var avatar = findAvatar(0, 1000);
    if(avatar){
        click(avatar.x, avatar.y)
-       sleep(2000);
+       checkUser();
+
        back();
    }
    sleep(2000);
-   swipe(30, 1000, 30, 820, 800);
+   swipe(30, 1000, 30, 1000 - 210 , 500);
 }
 
 function clickMessageIcon() {
@@ -31,10 +32,11 @@ function clickMessageIcon() {
 }
 
 function findAvatar(x, y) {
+    sleep(300);
     var img = captureScreen();
     var point = findColor(img, "#000000", {
         region: [x, y, 140, 170],
-        threshold: 40
+        threshold: 230
     });
     if (point) {
         console.log("find avatar:" + point);
@@ -46,6 +48,7 @@ function findAvatar(x, y) {
 }
 
 function checkUser() {
+    console.log(currentActivity());
     waitForActivity(
         "com.ss.android.ugc.aweme.profile.ui.UserProfileActivity",
         [(period = 100)]
@@ -62,6 +65,38 @@ function checkUser() {
         //click or not
     } else {
         console.log("not find age")
-        toast("无年龄");
+        toast("年龄不符");
+    }
+}
+
+function findFitAge(start, end) {
+    for (i = start; i <= end; i++) {
+        if (text(i + "岁").exists()) {
+            return text(i + "岁").findOne().bounds();
+        }
+    }
+    return false;
+}
+
+function sexCheck(bounds) {
+    var x = bounds.left;
+    var y = bounds.top;
+    if (y > 1200) return;
+    var margin = bounds.height() / 4;
+    click(x + margin, y + margin);
+    click(x + margin * 3 + 5, y + margin * 3);
+    sleep(100);
+    var img = captureScreen();
+    var point = findColor(img, "#d64765", {
+        region: [x, y, margin * 3, margin * 3],
+        threshold: 4
+    });
+    if (point) {
+        console.log("girl" + point);
+        click(point.x, point.y);
+        toast("女");
+    } else {
+        console.log("boy");
+        toast("男");
     }
 }
