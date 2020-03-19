@@ -34,7 +34,7 @@ while (loop > 0) {
         //click or not
     } else {
         console.log("not find age")
-        toast("无年龄");
+        toast("年龄不符");
     }
     back();
     sleep(200);

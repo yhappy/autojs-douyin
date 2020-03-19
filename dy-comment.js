@@ -11,7 +11,6 @@ while (1) {
    if(avatar){
        click(avatar.x, avatar.y)
        checkUser();
-
        back();
    }
    sleep(2000);
