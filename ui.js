@@ -19,6 +19,7 @@ ui.layout(
                 <text textSize="16sp" textColor="black">请选择功能：</text>
                 <spinner id="sp2" entries="-0️⃣粉丝页面分性别年龄关注-|-1️⃣评论页面分性别年龄关注-"></spinner>
                 <button id="start" text="开始" />
+                <button id="stop" text="停止" />
                 <text margin="10">手机系统Android7.0以上，关闭系统动画以提高性能。</text>
                 <text margin="10">使用前请打开无障碍服务，授予录屏权限。</text>
             </vertical>
@@ -44,6 +45,10 @@ ui.start.click(function () {
             break;
     }
 });
+ui.stop.click(function () {
+    exit();
+    toast("已停止")
+})
 
 function relationTabCheckToFollow() {
     "auto";
@@ -69,7 +74,7 @@ function relationTabCheckToFollow() {
         checkUser()
         back();
         sleep(200);
-        swipe(150, 900, 150, 720, 800);
+        swipe(150, 930, 150, 700, 800);
         sleep(200);
 
     }
@@ -77,11 +82,11 @@ function relationTabCheckToFollow() {
 
 function commentToFollow() {
     auto();
-    app.launchPackage("com.ss.android.ugc.aweme");
     if (!requestScreenCapture()) {
         toast("请求截图失败");
         exit();
     }
+    app.launchPackage("com.ss.android.ugc.aweme");
     console.log(currentActivity());
     clickMessageIcon();
     while (1) {
@@ -101,6 +106,7 @@ function clickMessageIcon() {
         "com.ss.android.ugc.aweme.main.MainActivity",
         [(period = 200)]
     );
+    id("a59").waitFor();
     var message_icon = id("a59").find();
     message_icon_size = message_icon.size();
     console.log(message_icon_size)
@@ -133,7 +139,7 @@ function checkUser() {
         [(period = 100)]
     );
     console.log("个人信息页面");
-    sleep(500);
+    textContains("抖音号").waitFor();
     var result = findFitAge(1, 99);
     console.log("age result: " + result);
     if (result) {
