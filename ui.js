@@ -13,7 +13,7 @@ ui.layout(
                 <horizontal>
                     <input gravity="center" width="50" id="start_age" text="23" inputType="number" />
                     <text textSize="16sp" textColor="black">岁 ~ </text>
-                    <input gravity="center" width="50" id="end_age" text="99" inputType="number" />
+                    <input gravity="center" width="50" id="end_age" text="69" inputType="number" />
                     <text textSize="16sp" textColor="black">岁</text>
                 </horizontal>
                 <text textSize="16sp" textColor="black">请选择功能：</text>
@@ -26,12 +26,29 @@ ui.layout(
         </vertical>
     </frame>
 );
+
+var userCount = 0;
+var userMatch = 0;
+var storage = storages.create("com.dy.tools");
+var sex = storage.get("sex", 0);
+var start_age =storage.get("start_age", "23");
+var end_age = storage.get("end_age", "69");
+var func_position = storage.get("func_position", 1);
+ui.sp1.setSelection(sex);
+ui.start_age.setText(start_age);
+ui.end_age.setText(end_age);
+ui.sp2.setSelection(func_position);
+
 ui.start.click(function () {
-    ui.sp2.setSelection(1);
-    var sex = ui.sp1.getSelectedItemPosition();
-    var start_age = ui.start_age.getText();
-    var end_age = ui.end_age.getText();
-    var func_position = ui.sp2.getSelectedItemPosition();
+    sex = ui.sp1.getSelectedItemPosition();
+    start_age = ui.start_age.getText();
+    end_age = ui.end_age.getText();
+    func_position = ui.sp2.getSelectedItemPosition();
+    storage.put("sex", sex);
+    storage.put("start_age", String(start_age));
+    storage.put("end_age", String(end_age));
+    storage.put("func_position", func_position);
+
     console.log("功能选择:" + func_position);
     switch (func_position) {
         case 0:
@@ -46,7 +63,6 @@ ui.start.click(function () {
             break;
     }
 });
-
 
 ui.stop.click(function () {
     exit();
@@ -90,29 +106,30 @@ function commentToFollow() {
         exit();
     }
     app.launchPackage("com.ss.android.ugc.aweme");
+    sleep(2000);
     console.log(currentActivity());
     clickMessagesIcon();
     while (1) {
         if (text("没有更多了").exists()) {
-            console.log("没有更多了");
-            toast("没有更多了");
+            console.log("没有更多评论");
+            toast("没有更多评论");
             back();
             swipeToNextVideo();
             clickMessagesIcon();
             continue;
         }
-        var avatar = findAvatar(0, 1000);
+        var avatar = findAvatar(0, 1200);
         if (avatar) {
             click(avatar.x, avatar.y)
             checkUser();
             back();
         }
         sleep(200);
-        swipe(30, 1000, 30, 1000 - 210, 500);
+        swipe(30, 1000, 30, 1000 - 220, 500);
     }
 }
 
-function swipeToNextVideo(){
+function swipeToNextVideo() {
     sleep(2000);
     swipe(400, 1200, 400, 1200 - 1000, 300);
     sleep(2000);
@@ -120,18 +137,14 @@ function swipeToNextVideo(){
 
 
 function clickMessagesIcon() {
-    waitForActivity(
-        "com.ss.android.ugc.aweme.main.MainActivity",
-        [(period = 200)]
-    );
     descStartsWith("评论").waitFor();
     var message_icon = descStartsWith("评论").find();
     message_icon_size = message_icon.size();
     console.log("message icon size:" + message_icon_size);
     var message_mid = message_icon[message_icon_size - 3];
     var message_mid_bounds = message_mid.bounds();
-    var message_mid_desc =message_mid.desc();
-    if(message_mid_desc == "评论评论，按钮"){
+    var message_mid_desc = message_mid.desc();
+    if (message_mid_desc == "评论评论，按钮") {
         console.log("无评论");
         toast("无评论");
         swipeToNextVideo();
@@ -164,8 +177,9 @@ function checkUser() {
         [(period = 100)]
     );
     console.log("个人信息页面");
+    userCount += 1;
     textContains("抖音号").waitFor();
-    var result = findFitAge(1, 99);
+    var result = findFitAge(start_age, end_age);
     console.log("age result: " + result);
     if (result) {
         console.log("find age");
@@ -195,7 +209,8 @@ function sexCheck(bounds) {
         console.log("girl" + point);
         // click(point.x, point.y);
         text("关注").findOne().click();
-        toast("女，已关注");
+        userMatch += 1;
+        toast("女，已关注，本轮共" + userCount + "，已找到" + userMatch);
         sleep(200);
     } else {
         console.log("sex not match");
@@ -203,7 +218,8 @@ function sexCheck(bounds) {
     }
 }
 
-function findFitAge(start, end) {
+function findFitAge(start, end) {6
+    console.log("find age " + start + " to " + end);
     for (i = start; i <= end; i++) {
         if (text(i + "岁").exists()) {
             return text(i + "岁").findOne().bounds();
