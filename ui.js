@@ -11,7 +11,7 @@ ui.layout(
                 <spinner id="sp1" entries="-♀女性❤-|-♂男性💙-"></spinner>
                 <text textSize="16sp" textColor="black">请输入关注年龄范围:</text>
                 <horizontal>
-                    <input gravity="center" width="50" id="start_age" text="20" inputType="number" />
+                    <input gravity="center" width="50" id="start_age" text="23" inputType="number" />
                     <text textSize="16sp" textColor="black">岁 ~ </text>
                     <input gravity="center" width="50" id="end_age" text="99" inputType="number" />
                     <text textSize="16sp" textColor="black">岁</text>
@@ -27,6 +27,7 @@ ui.layout(
     </frame>
 );
 ui.start.click(function () {
+    ui.sp2.setSelection(1);
     var sex = ui.sp1.getSelectedItemPosition();
     var start_age = ui.start_age.getText();
     var end_age = ui.end_age.getText();
@@ -45,10 +46,12 @@ ui.start.click(function () {
             break;
     }
 });
+
+
 ui.stop.click(function () {
     exit();
-    toast("已停止")
-})
+    toast("已停止");
+});
 
 function relationTabCheckToFollow() {
     "auto";
@@ -88,8 +91,16 @@ function commentToFollow() {
     }
     app.launchPackage("com.ss.android.ugc.aweme");
     console.log(currentActivity());
-    clickMessageIcon();
+    clickMessagesIcon();
     while (1) {
+        if (text("没有更多了").exists()) {
+            console.log("没有更多了");
+            toast("没有更多了");
+            back();
+            swipeToNextVideo();
+            clickMessagesIcon();
+            continue;
+        }
         var avatar = findAvatar(0, 1000);
         if (avatar) {
             click(avatar.x, avatar.y)
@@ -101,18 +112,32 @@ function commentToFollow() {
     }
 }
 
-function clickMessageIcon() {
+function swipeToNextVideo(){
+    sleep(2000);
+    swipe(400, 1200, 400, 1200 - 1000, 300);
+    sleep(2000);
+}
+
+
+function clickMessagesIcon() {
     waitForActivity(
         "com.ss.android.ugc.aweme.main.MainActivity",
         [(period = 200)]
     );
-    id("a59").waitFor();
-    var message_icon = id("a59").find();
+    descStartsWith("评论").waitFor();
+    var message_icon = descStartsWith("评论").find();
     message_icon_size = message_icon.size();
-    console.log(message_icon_size)
-    var message_bounds = message_icon[message_icon_size - 2].bounds()
-    console.log(message_bounds);
-    click(message_bounds.centerX(), message_bounds.centerY());
+    console.log("message icon size:" + message_icon_size);
+    var message_mid = message_icon[message_icon_size - 3];
+    var message_mid_bounds = message_mid.bounds();
+    var message_mid_desc =message_mid.desc();
+    if(message_mid_desc == "评论评论，按钮"){
+        console.log("无评论");
+        toast("无评论");
+        swipeToNextVideo();
+        clickMessagesIcon();
+    }
+    click(message_mid_bounds.centerX(), message_mid_bounds.centerY());
 }
 
 function findAvatar(x, y) {
@@ -169,8 +194,8 @@ function sexCheck(bounds) {
     if (point) {
         console.log("girl" + point);
         // click(point.x, point.y);
-        toast("女");
         text("关注").findOne().click();
+        toast("女，已关注");
         sleep(200);
     } else {
         console.log("sex not match");
