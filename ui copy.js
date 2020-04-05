@@ -1,10 +1,9 @@
 "ui";
-
 ui.layout(
     <frame>
         <vertical>
             <appbar>
-                <toolbar id="toolbar" title="Dytools v1.0"></toolbar>
+                <toolbar id="toolbar" title="引流助手1080x2080-v1.0"></toolbar>
             </appbar>
             <vertical margin="10">
                 <text textSize="16sp" textColor="black">请选择关注性别:</text>
@@ -31,7 +30,7 @@ var userCount = 0;
 var userMatch = 0;
 var storage = storages.create("com.dy.tools");
 var sex = storage.get("sex", 0);
-var start_age =storage.get("start_age", "23");
+var start_age = storage.get("start_age", "23");
 var end_age = storage.get("end_age", "69");
 var func_position = storage.get("func_position", 1);
 ui.sp1.setSelection(sex);
@@ -50,6 +49,7 @@ ui.start.click(function () {
     storage.put("func_position", func_position);
 
     console.log("功能选择:" + func_position);
+    toast("功能" + func_position +" 启动中，请稍后。。。");
     switch (func_position) {
         case 0:
             threads.start(function () {
@@ -81,7 +81,7 @@ function relationTabCheckToFollow() {
         "com.ss.android.ugc.aweme.following.ui.FollowRelationTabActivity",
         [(period = 200)]
     );
-    console.log("粉丝关系页面");
+    // console.log("粉丝关系页面");
     sleep(2000);
     var loop = 5000;
     while (loop > 0) {
@@ -125,7 +125,7 @@ function commentToFollow() {
             back();
         }
         sleep(200);
-        swipe(30, 1000, 30, 1000 - 220, 500);
+        swipe(30, 1000, 30, 1000 - 230, 500);
     }
 }
 
@@ -137,6 +137,7 @@ function swipeToNextVideo() {
 
 
 function clickMessagesIcon() {
+    sleep(1000);
     descStartsWith("评论").waitFor();
     var message_icon = descStartsWith("评论").find();
     message_icon_size = message_icon.size();
@@ -150,7 +151,8 @@ function clickMessagesIcon() {
         swipeToNextVideo();
         clickMessagesIcon();
     }
-    click(message_mid_bounds.centerX(), message_mid_bounds.centerY());
+    // click(message_mid_bounds.centerX(), message_mid_bounds.centerY());
+    click(1000,1555);
 }
 
 function findAvatar(x, y) {
@@ -172,13 +174,11 @@ function findAvatar(x, y) {
 
 function checkUser() {
     console.log(currentActivity());
-    waitForActivity(
-        "com.ss.android.ugc.aweme.profile.ui.UserProfileActivity",
-        [(period = 100)]
-    );
-    console.log("个人信息页面");
+    sleep(1000);
     userCount += 1;
+    sleep(1000);
     textContains("抖音号").waitFor();
+    console.log("找到抖音号");
     var result = findFitAge(start_age, end_age);
     console.log("age result: " + result);
     if (result) {
@@ -187,7 +187,7 @@ function checkUser() {
         console.log(bounds);
         sexCheck(age_bounds);
     } else {
-        console.log("not find age")
+        console.log("age not match")
         toast("年龄不符");
     }
 }
@@ -195,22 +195,26 @@ function checkUser() {
 function sexCheck(bounds) {
     var x = bounds.left;
     var y = bounds.top;
+    var sexColorList = ["#d64765", "#0da2b8"];
+    var sexStringList = ['女', '男'];
+    var sexColor = sexColorList[sex];
+    var sexString = sexStringList[sex];
     if (y > 1200) return;
     var margin = bounds.height() / 4;
     // click(x + margin, y + margin);
     // click(x + margin * 3 + 5, y + margin * 3);
     sleep(300);
     var img = captureScreen();
-    var point = findColor(img, "#d64765", {
+    var point = findColor(img, sexColor, {
         region: [x, y, margin * 3, margin * 3],
         threshold: 4
     });
     if (point) {
-        console.log("girl" + point);
+        console.log(sexString + point);
         // click(point.x, point.y);
         text("关注").findOne().click();
         userMatch += 1;
-        toast("女，已关注，本轮共" + userCount + "，已找到" + userMatch);
+        toast(sexString + ":已关注，本轮共" + userCount + "，已找到" + userMatch);
         sleep(200);
     } else {
         console.log("sex not match");
@@ -218,7 +222,8 @@ function sexCheck(bounds) {
     }
 }
 
-function findFitAge(start, end) {6
+function findFitAge(start, end) {
+    6
     console.log("find age " + start + " to " + end);
     for (i = start; i <= end; i++) {
         if (text(i + "岁").exists()) {
