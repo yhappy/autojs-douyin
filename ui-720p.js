@@ -3,7 +3,7 @@ ui.layout(
     <frame>
         <vertical>
             <appbar>
-                <toolbar id="toolbar" title="引流助手720x1280-v1.0"></toolbar>
+                <toolbar id="toolbar" title="引流助手720p-v1.1"></toolbar>
             </appbar>
             <vertical margin="10">
                 <text textSize="16sp" textColor="black">请选择关注性别:</text>
@@ -17,10 +17,18 @@ ui.layout(
                 </horizontal>
                 <text textSize="16sp" textColor="black">请选择功能：</text>
                 <spinner id="sp2" entries="-0️⃣粉丝页面分性别年龄关注-|-1️⃣评论页面分性别年龄关注-"></spinner>
+                <text textSize="16sp" textColor="black">评论页面上滑设置:</text>
+                <horizontal>
+                    <text textSize="16sp" textColor="black">上滑距离</text>
+                    <input gravity="center" width="50" id="avatar_slide_up_distance" text="150" inputType="number" />
+                    <text textSize="16sp" textColor="black">总次数</text>
+                    <input gravity="center" width="50" id="avatar_slide_up_num" text="150" inputType="number" />
+                </horizontal>
                 <button id="start" text="开始" />
                 <button id="stop" text="停止" />
                 <text margin="10">手机系统Android7.0以上，关闭系统动画以提高性能。</text>
                 <text margin="10">使用前请打开无障碍服务，授予录屏权限。</text>
+                <text margin="10">若退出本服务请点击停止按钮。</text>
             </vertical>
         </vertical>
     </frame>
@@ -33,20 +41,29 @@ var sex = storage.get("sex", 0);
 var start_age = storage.get("start_age", "23");
 var end_age = storage.get("end_age", "69");
 var func_position = storage.get("func_position", 1);
+var avatar_slide_up_distance = storage.get("avatar_slide_up_distance", "150");
+var avatar_slide_up_num = storage.get("avatar_slide_up_num", "3");
+// var avatar_slide_up_time = storage.get("avatar_slide_up_time", 500);
 ui.sp1.setSelection(sex);
 ui.start_age.setText(start_age);
 ui.end_age.setText(end_age);
 ui.sp2.setSelection(func_position);
+ui.avatar_slide_up_distance.setText(avatar_slide_up_distance);
+ui.avatar_slide_up_num.setText(avatar_slide_up_num);
 
 ui.start.click(function () {
     if (!checkTime()) return;
     sex = ui.sp1.getSelectedItemPosition();
     start_age = ui.start_age.getText();
     end_age = ui.end_age.getText();
+    avatar_slide_up_distance = ui.avatar_slide_up_distance.getText();
+    avatar_slide_up_num = ui.avatar_slide_up_num.getText();
     func_position = ui.sp2.getSelectedItemPosition();
     storage.put("sex", sex);
     storage.put("start_age", String(start_age));
     storage.put("end_age", String(end_age));
+    storage.put("avatar_slide_up_distance", String(avatar_slide_up_distance));
+    storage.put("avatar_slide_up_num", String(avatar_slide_up_num));
     storage.put("func_position", func_position);
 
     console.log("功能选择:" + func_position);
@@ -72,7 +89,7 @@ ui.stop.click(function () {
 
 function checkTime() {
     let time = new Date().getTime();
-    return time < 1587818212000;
+    return time < 1647918212000;
 }
 
 function relationTabCheckToFollow() {
@@ -115,29 +132,36 @@ function commentToFollow() {
     sleep(2000);
     console.log(currentActivity());
     clickMessagesIcon();
+    var max_swipe = avatar_slide_up_num;
     while (1) {
-        if (text("没有更多了").exists()) {
+        if (text("没有更多了").exists() || max_swipe <= 0) {
             console.log("没有更多评论");
             toast("没有更多评论");
             back();
             swipeToNextVideo();
             clickMessagesIcon();
-            continue;
+            max_swipe = avatar_slide_up_num;
         }
-        var avatar = findAvatar(0, 700);
-        if (avatar) {
-            click(avatar.x, avatar.y)
+        // var avatar = findAvatar(30, 500);
+        var nickname= findNickName(400);
+        if (nickname) {
+            console.log(nickname.text());
+            var bounds = nickname.bounds()
+            click(bounds.centerX(), bounds.centerY())
             checkUser();
             back();
         }
         sleep(200);
-        swipe(10, 700 + 130, 10, 700, 500);
+        //slide up to find next avatar
+        swipe(10, 700 + Number(avatar_slide_up_distance), 10, 700, 500);
+        max_swipe -= 1;
     }
 }
 
+
 function swipeToNextVideo() {
     sleep(2000);
-    swipe(300, 700, 300, 700 - 500, 300);
+    swipe(300, 900, 300, 900 - 700, 200);
     sleep(2000);
 }
 
@@ -160,11 +184,28 @@ function clickMessagesIcon() {
     click(message_mid_bounds.centerX(), message_mid_bounds.centerY());
 }
 
+var temp_nickname = "";
+function findNickName(y) {
+    var titles = id("title").find();
+    for (var i = 0; i < titles.length; i++) {
+        var title = titles[i];
+        if (title.text() != "" && title.bounds().centerY() > y && title.bounds().centerY() < (y+138)) {
+            if(temp_nickname == title.text()){
+                console.log('昵称重复')
+                return;
+            }
+            temp_nickname = title.text();
+            return title;
+        }
+    }
+    // console.log(titles.size());
+}
+
 function findAvatar(x, y) {
     sleep(300);
     var img = captureScreen();
     var point = findColor(img, "#000000", {
-        region: [x, y, 76, 120],
+        region: [x, y, 68, 120],
         threshold: 230
     });
     if (point) {
@@ -204,7 +245,7 @@ function sexCheck(bounds) {
     var sexStringList = ['女', '男'];
     var sexColor = sexColorList[sex];
     var sexString = sexStringList[sex];
-    if (y > 680) return;
+    if (y > 780) return;
     var margin = bounds.height() / 4;
     click(x + margin, y + margin);
     click(x + margin * 3 + 5, y + margin * 3);

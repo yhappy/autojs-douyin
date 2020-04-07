@@ -125,7 +125,7 @@ function commentToFollow() {
             back();
         }
         sleep(200);
-        swipe(30, 1000, 30, 1000 - 230, 500);
+        swipe(30, 1200 + 230, 30, 1200, 500);
     }
 }
 
@@ -151,8 +151,7 @@ function clickMessagesIcon() {
         swipeToNextVideo();
         clickMessagesIcon();
     }
-    // click(message_mid_bounds.centerX(), message_mid_bounds.centerY());
-    click(1000,1555);
+    click(message_mid_bounds.centerX(), message_mid_bounds.centerY());
 }
 
 function findAvatar(x, y) {
