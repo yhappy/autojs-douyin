@@ -1,4 +1,3 @@
-### Auto JS
-- fans page
-- comment page
-- app ui
+### Auto JS Douyin 
+
+依托 Auto JS 的无障碍功能，实现自动滑动 Douyin 的视频，并且实现在评论页面进入评论人主页，然后根据年龄和性别判断是否添加好友。 
